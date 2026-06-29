@@ -1,6 +1,6 @@
 // Supabase Initialization
-const supabaseUrl = 'https://sggcelkiaqdrwzlwzdgv.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnZ2NlbGtpYXFkcnd6bHd6ZGd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDU2OTUsImV4cCI6MjA5NzYyMTY5NX0.2KAlXLOLkr6Y53oposwCrcACLWIVTJMfpP2o6V2OgQs';
+const supabaseUrl = 'https://nchyndflukleofvspyix.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jaHluZGZsdWtsZW9mdnNweWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3Mjg2MTMsImV4cCI6MjA5ODMwNDYxM30.z3GvwK93_RBDDGQoUbpfb9e93190bmG1Tc6xI8G6dY0';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 // State management
@@ -161,7 +161,7 @@ async function syncWithSupabase() {
         const { data, error } = await supabaseClient
             .from('challenge_data')
             .select('theme, viewMode, readers')
-            .eq('id', 2)
+            .eq('id', 1)
             .single();
 
         if (error) throw error;
@@ -211,7 +211,7 @@ function subscribeToChanges() {
         .channel('custom-all-channel')
         .on(
             'postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'challenge_data', filter: 'id=eq.2' },
+            { event: 'UPDATE', schema: 'public', table: 'challenge_data', filter: 'id=eq.1' },
             (payload) => {
                 console.log('실시간 업데이트 수신:', payload);
                 challengeData.theme = payload.new.theme || 'modern';
@@ -250,7 +250,7 @@ async function pushToSupabase() {
         const { error } = await supabaseClient
             .from('challenge_data')
             .upsert({
-                id: 2,
+                id: 1,
                 theme: challengeData.theme,
                 viewMode: viewModeStr,
                 readers: challengeData.readers
