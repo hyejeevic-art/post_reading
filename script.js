@@ -1,6 +1,6 @@
 // Supabase Initialization
 const supabaseUrl = 'https://nchyndflukleofvspyix.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jaHluZGZsdWtsZW9mdnNweWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3Mjg2MTMsImV4cCI6MjA5ODMwNDYxM30.z3GvwK93_RBDDGQoUbpfb9e93190bmG1Tc6xI8G6dY0';
+const supabaseKey = 'sb_publishable_XZg0Fp-5J5ghgfZ9WHdFtw_yTes0vS-';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 // State management
