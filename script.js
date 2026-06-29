@@ -13,12 +13,13 @@ let currentMonth = 7; // July
 
 let challengeData = {
     theme: 'modern',
-    readers: [
-        { id: 1, name: '참가자 1', book: '', completedDays: [], uid: null },
-        { id: 2, name: '참가자 2', book: '', completedDays: [], uid: null },
-        { id: 3, name: '참가자 3', book: '', completedDays: [], uid: null },
-        { id: 4, name: '참가자 4', book: '', completedDays: [], uid: null }
-    ]
+    readers: Array.from({ length: 20 }, (_, i) => ({
+        id: i + 1,
+        name: `참가자 ${i + 1}`,
+        book: '',
+        completedDays: [],
+        uid: null
+    }))
 };
 
 // ─── Dark Mode ───────────────────────────────────────────
@@ -177,7 +178,7 @@ async function syncWithSupabase() {
                 if (!r.completedDays) r.completedDays = [];
             });
 
-            while (syncedReaders.length < 4) {
+            while (syncedReaders.length < 20) {
                 const nextId = syncedReaders.length + 1;
                 syncedReaders.push({ id: nextId, name: `참가자 ${nextId}`, book: '', completedDays: [], uid: null });
                 updated = true;
@@ -220,7 +221,7 @@ function subscribeToChanges() {
                 syncedReaders.forEach(r => {
                     if (!r.completedDays) r.completedDays = [];
                 });
-                while (syncedReaders.length < 4) {
+                while (syncedReaders.length < 20) {
                     const nextId = syncedReaders.length + 1;
                     syncedReaders.push({ id: nextId, name: `참가자 ${nextId}`, completedDays: [], uid: null });
                 }
