@@ -147,6 +147,12 @@ function updateUI() {
 
     updateMonthLabel();
     renderGrids();
+    
+    // Refresh stats if open
+    const statsModal = document.getElementById('stats-modal');
+    if (statsModal && statsModal.classList.contains('show')) {
+        updateStatsDashboard();
+    }
 }
 
 // ─── Supabase Sync ───────────────────────────────────────
@@ -574,6 +580,273 @@ function toggleDay(readerId, dateStr) {
 
     pushToSupabase();
     renderGrids();
+}
+
+// ─── Statistics Logic ────────────────────────────────────
+let statsActiveTab = 'monthly';
+let statsChartInstance = null;
+
+function showStatsModal() {
+    const modal = document.getElementById('stats-modal');
+    if (modal) {
+        modal.classList.add('show');
+        switchStatsTab(statsActiveTab);
+    }
+}
+
+function closeStatsModal() {
+    const modal = document.getElementById('stats-modal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+function switchStatsTab(tabName) {
+    statsActiveTab = tabName;
+    
+    // Update active tab styling
+    document.querySelectorAll('.stats-tab').forEach(btn => btn.classList.remove('active'));
+    const activeTabButton = document.getElementById(`tab-${tabName}`);
+    if (activeTabButton) activeTabButton.classList.add('active');
+
+    // Populate periods selector
+    populateStatsPeriods();
+    updateStatsDashboard();
+}
+
+function populateStatsPeriods() {
+    const select = document.getElementById('stats-period-select');
+    if (!select) return;
+    select.innerHTML = '';
+
+    if (statsActiveTab === 'monthly') {
+        // July 2026 to Dec 2027
+        let year = 2026;
+        let month = 7;
+        while (year < 2028) {
+            const val = `${year}-${String(month).padStart(2, '0')}`;
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = `${year}년 ${month}월`;
+            
+            // Set current viewed month as default
+            if (year === currentYear && month === currentMonth) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+            
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+        }
+    } else if (statsActiveTab === 'quarterly') {
+        // Quarters starting from 2026 Q3 (Challenge start)
+        const quarters = [
+            { year: 2026, q: 3, label: '2026년 3분기 (7~9월)' },
+            { year: 2026, q: 4, label: '2026년 4분기 (10~12월)' },
+            { year: 2027, q: 1, label: '2027년 1분기 (1~3월)' },
+            { year: 2027, q: 2, label: '2027년 2분기 (4~6월)' },
+            { year: 2027, q: 3, label: '2027년 3분기 (7~9월)' },
+            { year: 2027, q: 4, label: '2027년 4분기 (10~12월)' }
+        ];
+        
+        // Find current quarter to default select
+        const currentQ = Math.ceil(currentMonth / 3);
+        quarters.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = `${item.year}-Q${item.q}`;
+            opt.textContent = item.label;
+            if (item.year === currentYear && item.q === currentQ) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+    } else if (statsActiveTab === 'yearly') {
+        const years = [2026, 2027, 2028];
+        years.forEach(yr => {
+            const opt = document.createElement('option');
+            opt.value = `${yr}`;
+            opt.textContent = `${yr}년 전체`;
+            if (yr === currentYear) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+    }
+}
+
+function onStatsPeriodChange() {
+    updateStatsDashboard();
+}
+
+function getDaysInQuarter(year, quarter) {
+    let days = 0;
+    const startMonth = (quarter - 1) * 3 + 1;
+    for (let m = startMonth; m < startMonth + 3; m++) {
+        days += getDaysInMonth(year, m);
+    }
+    return days;
+}
+
+function getDaysInYear(year) {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 366 : 365;
+}
+
+function updateStatsDashboard() {
+    const select = document.getElementById('stats-period-select');
+    if (!select) return;
+    const periodVal = select.value;
+    if (!periodVal) return;
+
+    let totalDays = 30;
+    let filterFn = (dayStr) => false;
+
+    if (statsActiveTab === 'monthly') {
+        const parts = periodVal.split('-');
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        totalDays = getDaysInMonth(y, m);
+        filterFn = (dayStr) => dayStr.startsWith(`${y}-${String(m).padStart(2, '0')}-`);
+    } else if (statsActiveTab === 'quarterly') {
+        const parts = periodVal.split('-Q');
+        const y = parseInt(parts[0], 10);
+        const q = parseInt(parts[1], 10);
+        totalDays = getDaysInQuarter(y, q);
+        
+        const startMonth = (q - 1) * 3 + 1;
+        const validMonths = [
+            `${y}-${String(startMonth).padStart(2, '0')}-`,
+            `${y}-${String(startMonth + 1).padStart(2, '0')}-`,
+            `${y}-${String(startMonth + 2).padStart(2, '0')}-`
+        ];
+        filterFn = (dayStr) => validMonths.some(prefix => dayStr.startsWith(prefix));
+    } else if (statsActiveTab === 'yearly') {
+        const y = parseInt(periodVal, 10);
+        totalDays = getDaysInYear(y);
+        filterFn = (dayStr) => dayStr.startsWith(`${y}-`);
+    }
+
+    // Process data for each reader
+    const statsData = challengeData.readers.map(reader => {
+        let completedCount = 0;
+        if (Array.isArray(reader.completedDays)) {
+            completedCount = reader.completedDays.filter(dayStr => {
+                if (typeof dayStr !== 'string') return false;
+                return filterFn(dayStr);
+            }).length;
+        }
+        const percentage = totalDays > 0 ? Math.round((completedCount / totalDays) * 100) : 0;
+        return {
+            name: reader.name,
+            book: reader.book || '-',
+            count: completedCount,
+            pct: percentage,
+            isClaimed: !!reader.uid
+        };
+    });
+
+    // Leaderboard sorts active users first (claimed slots), then by completions
+    const sortedReaders = [...statsData].sort((a, b) => {
+        if (a.isClaimed && !b.isClaimed) return -1;
+        if (!a.isClaimed && b.isClaimed) return 1;
+        return b.count - a.count;
+    });
+
+    renderStatsChart(sortedReaders, totalDays);
+    renderLeaderboard(sortedReaders, totalDays);
+}
+
+function renderStatsChart(readers, totalDays) {
+    const canvas = document.getElementById('statsChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    if (statsChartInstance) {
+        statsChartInstance.destroy();
+    }
+
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#f8fafc' : '#1e293b';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+    
+    // Fetch theme colors dynamically
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primaryColor = rootStyles.getPropertyValue('--primary').trim() || '#6366f1';
+    const accentColor = rootStyles.getPropertyValue('--accent').trim() || '#0ea5e9';
+
+    // Only chart readers that have been claimed to avoid cluttering with placeholders
+    const activeReaders = readers.filter(r => r.isClaimed);
+    const chartReaders = activeReaders.length > 0 ? activeReaders : readers.slice(0, 5);
+
+    statsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartReaders.map(r => r.name),
+            datasets: [{
+                label: '완료일수',
+                data: chartReaders.map(r => r.count),
+                backgroundColor: primaryColor,
+                borderColor: accentColor,
+                borderWidth: 1.5,
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const val = context.raw;
+                            const pct = totalDays > 0 ? Math.round((val / totalDays) * 100) : 0;
+                            return ` 완료: ${val}일 (${pct}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    max: totalDays,
+                    grid: { color: gridColor },
+                    ticks: { color: textColor, stepSize: Math.ceil(totalDays / 10) }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: textColor }
+                }
+            }
+        }
+    });
+}
+
+function renderLeaderboard(readers, totalDays) {
+    const tbody = document.getElementById('leaderboard-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const rankedReaders = readers.filter(r => r.isClaimed);
+    const unrankedReaders = readers.filter(r => !r.isClaimed);
+
+    const renderRow = (r, index, isRanked) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${isRanked ? `<strong>${index + 1}</strong>` : '-'}</td>
+            <td>${r.name}</td>
+            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${r.book}</td>
+            <td>${r.count}일</td>
+            <td><strong style="color: var(--primary);">${r.pct}%</strong></td>
+        `;
+        tbody.appendChild(tr);
+    };
+
+    rankedReaders.forEach((r, idx) => renderRow(r, idx, true));
+    unrankedReaders.forEach(r => renderRow(r, 0, false));
 }
 
 // ─── Initialize ──────────────────────────────────────────

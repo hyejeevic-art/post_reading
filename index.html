@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="background-decor">
@@ -42,6 +44,9 @@
                 <button id="theme-toggle" onclick="toggleTheme()" class="theme-btn">
                     <span class="icon">🍇</span> <span>모드 변경</span>
                 </button>
+                <button id="stats-toggle" onclick="showStatsModal()" class="theme-btn">
+                    <span class="icon">📊</span> <span>통계 보기</span>
+                </button>
             </div>
         </div>
     </header>
@@ -63,6 +68,50 @@
             <div class="modal-actions">
                 <button class="modal-btn cancel" onclick="closeParticipantModal()">취소</button>
                 <button class="modal-btn confirm" onclick="confirmAddParticipant()">참가하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 통계 모달 -->
+    <div id="stats-modal" class="modal-overlay">
+        <div class="modal-card stats-modal-card">
+            <button class="modal-close" onclick="closeStatsModal()">✕</button>
+            <h2 class="modal-title">📊 챌린지 통계</h2>
+            
+            <div class="stats-tabs">
+                <button id="tab-monthly" class="stats-tab active" onclick="switchStatsTab('monthly')">월별</button>
+                <button id="tab-quarterly" class="stats-tab" onclick="switchStatsTab('quarterly')">분기별</button>
+                <button id="tab-yearly" class="stats-tab" onclick="switchStatsTab('yearly')">연별</button>
+            </div>
+            
+            <div class="stats-filter-row">
+                <select id="stats-period-select" class="modal-input stats-select" onchange="onStatsPeriodChange()">
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="statsChart"></canvas>
+            </div>
+            
+            <div class="leaderboard-container">
+                <h3 class="leaderboard-title">🏆 참여 현황</h3>
+                <div class="leaderboard-wrap">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>순위</th>
+                                <th>참가자</th>
+                                <th>원서</th>
+                                <th>완료</th>
+                                <th>달성률</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

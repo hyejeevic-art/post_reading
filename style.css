@@ -701,3 +701,130 @@ footer {
         padding: 0.25rem 0.7rem;
     }
 }
+
+/* ─── Statistics Modal ───────────────────────────────────── */
+.stats-modal-card {
+    max-width: 800px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2.5rem 2rem;
+}
+
+.stats-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+    background: var(--day-bg);
+    padding: 0.3rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.stats-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.stats-tab.active {
+    background: var(--card-bg);
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .stats-tab.active {
+    background: rgba(30, 41, 59, 0.9);
+    color: white;
+}
+
+.stats-filter-row {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.stats-select {
+    max-width: 280px;
+    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+}
+
+.chart-container {
+    position: relative;
+    margin: 1.5rem 0 2.5rem;
+    height: 320px;
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1rem;
+}
+
+body.dark-mode .chart-container {
+    background: rgba(30, 41, 59, 0.4);
+}
+
+.leaderboard-container {
+    text-align: left;
+    margin-top: 1.5rem;
+}
+
+.leaderboard-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    color: var(--text-main);
+}
+
+.leaderboard-wrap {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: var(--day-bg);
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.leaderboard-table th, 
+.leaderboard-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.leaderboard-table th {
+    font-weight: 700;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-mode .leaderboard-table th {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.leaderboard-table tr:last-child td {
+    border-bottom: none;
+}
+
+.leaderboard-table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+body.dark-mode .leaderboard-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
