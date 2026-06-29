@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post 매일 원서 페이지 읽기. with 빛나는사람아</title>
+    <meta name="description" content="매일 영어 원서 읽기 미션 트래커">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-decor">
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+    </div>
+
+    <header>
+        <div class="container">
+            <h1 class="title">Post 매일 원서 <span class="accent">페이지 읽기</span></h1>
+            <p class="subtitle">with 빛나는사람아</p>
+            
+            <div class="month-navigation">
+                <button id="prev-month-btn" onclick="navigateMonth(-1)" class="nav-btn">◀ 저번달</button>
+                <span id="current-month-label" class="current-month-label">2026년 7월</span>
+                <button id="next-month-btn" onclick="navigateMonth(1)" class="nav-btn">다음달 ▶</button>
+            </div>
+
+            <div class="toolbar">
+                <span id="user-info" class="user-info" style="display:none;"></span>
+                <button id="auth-btn" onclick="toggleAuth()" class="google-btn">
+                    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="google-icon">
+                    <span id="auth-btn-text">구글 로그인</span>
+                </button>
+                <button id="add-participant-btn" onclick="showAddParticipantModal()" class="action-btn add-btn" style="display:none;">
+                    <span class="icon">➕</span> <span>참가하기</span>
+                </button>
+                <button id="dark-toggle" onclick="toggleDarkMode()" class="theme-btn">
+                    <span class="icon">🌙</span> <span id="dark-toggle-text">다크모드</span>
+                </button>
+                <button id="theme-toggle" onclick="toggleTheme()" class="theme-btn">
+                    <span class="icon">🍇</span> <span>모드 변경</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="readers-container" class="readers-grid">
+            <!-- Dynamic content injected by JS -->
+        </div>
+    </main>
+
+    <!-- 참가자 추가 모달 -->
+    <div id="participant-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeParticipantModal()">✕</button>
+            <h2 class="modal-title">챌린지 참가하기 🎉</h2>
+            <p class="modal-desc">사용할 이름을 입력해주세요.<br>다른 참가자들에게 보이는 이름입니다.</p>
+            <input type="text" id="participant-name-input" class="modal-input" placeholder="예: 홍길동" maxlength="20" 
+                onkeydown="if(event.key==='Enter') confirmAddParticipant()">
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeParticipantModal()">취소</button>
+                <button class="modal-btn confirm" onclick="confirmAddParticipant()">참가하기</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Reading Challenge • Made for Book Lovers</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
