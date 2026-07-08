@@ -66,10 +66,10 @@ function updateMonthLabel() {
         label.textContent = `${currentYear}년 ${currentMonth}월`;
     }
 
-    // Disable Prev button if we are at July 2026
+    // Disable Prev button if we are at June 2026
     const prevBtn = document.getElementById('prev-month-btn');
     if (prevBtn) {
-        if (currentYear === 2026 && currentMonth === 7) {
+        if (currentYear === 2026 && currentMonth === 6) {
             prevBtn.disabled = true;
         } else {
             prevBtn.disabled = false;
@@ -87,10 +87,10 @@ function navigateMonth(direction) {
         currentYear -= 1;
     }
 
-    // Ensure we don't go before July 2026
-    if (currentYear < 2026 || (currentYear === 2026 && currentMonth < 7)) {
+    // Ensure we don't go before June 2026
+    if (currentYear < 2026 || (currentYear === 2026 && currentMonth < 6)) {
         currentYear = 2026;
-        currentMonth = 7;
+        currentMonth = 6;
     }
 
     updateMonthLabel();
@@ -139,10 +139,22 @@ function updateUI() {
         if (addParticipantBtn) {
             addParticipantBtn.style.display = mySlot ? 'none' : 'inline-flex';
         }
+
+        // Admin button
+        const adminBtn = document.getElementById('admin-btn');
+        if (adminBtn) {
+            if (displayName.includes('빛나는사람아') || currentUser.email === '빛나는사람아@gmail.com') {
+                adminBtn.style.display = 'inline-flex';
+            } else {
+                adminBtn.style.display = 'none';
+            }
+        }
     } else {
         if (authBtnText) authBtnText.textContent = '구글 로그인';
         if (userInfoEl) userInfoEl.style.display = 'none';
         if (addParticipantBtn) addParticipantBtn.style.display = 'none';
+        const adminBtn = document.getElementById('admin-btn');
+        if (adminBtn) adminBtn.style.display = 'none';
     }
 
     updateMonthLabel();
@@ -173,7 +185,7 @@ async function syncWithSupabase() {
             if (data.viewMode && data.viewMode.includes('-')) {
                 const parts = data.viewMode.split('-');
                 currentYear = parseInt(parts[0], 10) || 2026;
-                currentMonth = parseInt(parts[1], 10) || 7;
+                currentMonth = parseInt(parts[1], 10) || 6;
             }
 
             let syncedReaders = Array.isArray(data.readers) ? data.readers : challengeData.readers;
@@ -220,7 +232,7 @@ function subscribeToChanges() {
                 if (payload.new.viewMode && payload.new.viewMode.includes('-')) {
                     const parts = payload.new.viewMode.split('-');
                     currentYear = parseInt(parts[0], 10) || 2026;
-                    currentMonth = parseInt(parts[1], 10) || 7;
+                    currentMonth = parseInt(parts[1], 10) || 6;
                 }
 
                 let syncedReaders = Array.isArray(payload.new.readers) ? payload.new.readers : challengeData.readers;
@@ -620,9 +632,9 @@ function populateStatsPeriods() {
     select.innerHTML = '';
 
     if (statsActiveTab === 'monthly') {
-        // July 2026 to Dec 2027
+        // June 2026 to Dec 2027
         let year = 2026;
-        let month = 7;
+        let month = 6;
         while (year < 2028) {
             const val = `${year}-${String(month).padStart(2, '0')}`;
             const opt = document.createElement('option');
@@ -642,8 +654,9 @@ function populateStatsPeriods() {
             }
         }
     } else if (statsActiveTab === 'quarterly') {
-        // Quarters starting from 2026 Q3 (Challenge start)
+        // Quarters starting from 2026 Q2 (Challenge start)
         const quarters = [
+            { year: 2026, q: 2, label: '2026년 2분기 (4~6월)' },
             { year: 2026, q: 3, label: '2026년 3분기 (7~9월)' },
             { year: 2026, q: 4, label: '2026년 4분기 (10~12월)' },
             { year: 2027, q: 1, label: '2027년 1분기 (1~3월)' },
@@ -854,17 +867,17 @@ window.onload = async () => {
     loadDarkMode();
     loadLocalData();
 
-    // Determine current month / year to view (starting at least at July 2026)
+    // Determine current month / year to view (starting at least at June 2026)
     const today = new Date();
     const todayYear = today.getFullYear();
     const todayMonth = today.getMonth() + 1;
     
-    if (todayYear > 2026 || (todayYear === 2026 && todayMonth >= 7)) {
+    if (todayYear > 2026 || (todayYear === 2026 && todayMonth >= 6)) {
         currentYear = todayYear;
         currentMonth = todayMonth;
     } else {
         currentYear = 2026;
-        currentMonth = 7;
+        currentMonth = 6;
     }
 
     // Auth Listener
@@ -880,3 +893,72 @@ window.onload = async () => {
     await syncWithSupabase();
     subscribeToChanges();
 };
+
+// ─── Admin Modal ─────────────────────────────────────────
+function showAdminModal() {
+    renderAdminSlots();
+    document.getElementById('admin-modal').classList.add('show');
+}
+
+function closeAdminModal() {
+    document.getElementById('admin-modal').classList.remove('show');
+}
+
+function renderAdminSlots() {
+    const container = document.getElementById('admin-slots-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    challengeData.readers.forEach((r, index) => {
+        const row = document.createElement('div');
+        row.className = 'admin-slot-row';
+        
+        const info = document.createElement('div');
+        info.className = 'admin-slot-info';
+        
+        const isOccupied = r.uid || r.name !== `참가자 ${r.id}`;
+        info.innerHTML = `<strong>슬롯 ${r.id}:</strong> ${isOccupied ? r.name : '비어있음'}`;
+        
+        const actions = document.createElement('div');
+        actions.className = 'admin-slot-actions';
+        
+        if (isOccupied) {
+            const delBtn = document.createElement('button');
+            delBtn.className = 'admin-btn-delete';
+            delBtn.textContent = '삭제';
+            delBtn.onclick = () => adminDeleteUser(index);
+            actions.appendChild(delBtn);
+        } else {
+            const addBtn = document.createElement('button');
+            addBtn.className = 'admin-btn-add';
+            addBtn.textContent = '강제 추가';
+            addBtn.onclick = () => adminAddUser(index);
+            actions.appendChild(addBtn);
+        }
+
+        row.appendChild(info);
+        row.appendChild(actions);
+        container.appendChild(row);
+    });
+}
+
+async function adminDeleteUser(index) {
+    if (confirm('이 사용자의 모든 기록이 삭제되고 슬롯이 초기화됩니다. 계속하시겠습니까?')) {
+        const id = challengeData.readers[index].id;
+        challengeData.readers[index] = { id: id, name: `참가자 ${id}`, book: '', completedDays: [], uid: null };
+        await pushToSupabase();
+        renderAdminSlots();
+        updateUI();
+    }
+}
+
+async function adminAddUser(index) {
+    const name = prompt('슬롯을 강제로 할당할 사용자의 이름을 입력하세요:');
+    if (name && name.trim() !== '') {
+        challengeData.readers[index].name = name.trim();
+        // admin added users won't have a UID unless they link it, but can be displayed.
+        await pushToSupabase();
+        renderAdminSlots();
+        updateUI();
+    }
+}

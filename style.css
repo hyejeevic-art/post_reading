@@ -828,3 +828,57 @@ body.dark-mode .leaderboard-table tbody tr:hover {
     background: rgba(255, 255, 255, 0.02);
 }
 
+
+/* ─── Admin Modal ─── */
+.admin-list-container {
+    margin-top: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding-right: 0.5rem;
+}
+
+.admin-slot-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--day-bg);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    border: 1px solid var(--glass-border);
+}
+
+.admin-slot-info strong {
+    color: var(--primary);
+    margin-right: 0.5rem;
+}
+
+.admin-slot-actions button {
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 0.5rem;
+}
+
+.admin-btn-add {
+    background: var(--primary);
+    color: white;
+}
+.admin-btn-add:hover {
+    background: #4f46e5;
+}
+
+.admin-btn-delete {
+    background: #ef4444;
+    color: white;
+}
+.admin-btn-delete:hover {
+    background: #dc2626;
+}

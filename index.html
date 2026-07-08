@@ -47,6 +47,9 @@
                 <button id="stats-toggle" onclick="showStatsModal()" class="theme-btn">
                     <span class="icon">📊</span> <span>통계 보기</span>
                 </button>
+                <button id="admin-btn" onclick="showAdminModal()" class="theme-btn" style="display:none;">
+                    <span class="icon">⚙️</span> <span>관리자</span>
+                </button>
             </div>
         </div>
     </header>
@@ -119,6 +122,18 @@
     <footer>
         <p>&copy; 2026 Reading Challenge • Made for Book Lovers</p>
     </footer>
+
+    <!-- 관리자 모달 -->
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-card stats-modal-card">
+            <button class="modal-close" onclick="closeAdminModal()">✕</button>
+            <h2 class="modal-title">⚙️ 관리자 메뉴</h2>
+            <p class="modal-desc" style="margin-bottom: 1rem;">슬롯 강제 할당 및 삭제를 수행할 수 있습니다.</p>
+            <div class="admin-list-container" id="admin-slots-container">
+                <!-- slots injected via JS -->
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
