@@ -45,7 +45,7 @@ function updateAuthUI() {
         const displayName = currentUser.user_metadata?.full_name || currentUser.email || '';
         
         // Check Admin privilege
-        if (displayName === 'H K' || displayName.includes('H K')) {
+        if (currentUser.email === 'hyejee.vic@gmail.com') {
             authSection.querySelector('p').textContent = `환영합니다, 관리자 ${displayName}님.`;
             authBtnText.textContent = '로그아웃';
             adminContent.style.display = 'block';
