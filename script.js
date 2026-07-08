@@ -141,20 +141,27 @@ function updateUI() {
         }
 
         // Admin button
-        const adminBtn = document.getElementById('admin-btn');
-        if (adminBtn) {
-            if (displayName.includes('빛나는사람아') || currentUser.email === '빛나는사람아@gmail.com') {
-                adminBtn.style.display = 'inline-flex';
+        const adminLinkBtn = document.getElementById('admin-link-btn');
+        if (adminLinkBtn) {
+            const displayName = currentUser.user_metadata?.full_name || '';
+            const userEmail = (currentUser.email || currentUser.user_metadata?.email || '').toLowerCase();
+            if (
+                userEmail === 'hyejee.vic@gmail.com' || 
+                displayName === 'H K' || 
+                displayName === 'HK' || 
+                displayName.includes('빛나는사람아')
+            ) {
+                adminLinkBtn.style.display = 'inline-flex';
             } else {
-                adminBtn.style.display = 'none';
+                adminLinkBtn.style.display = 'none';
             }
         }
     } else {
         if (authBtnText) authBtnText.textContent = '구글 로그인';
         if (userInfoEl) userInfoEl.style.display = 'none';
         if (addParticipantBtn) addParticipantBtn.style.display = 'none';
-        const adminBtn = document.getElementById('admin-btn');
-        if (adminBtn) adminBtn.style.display = 'none';
+        const adminLinkBtn = document.getElementById('admin-link-btn');
+        if (adminLinkBtn) adminLinkBtn.style.display = 'none';
     }
 
     updateMonthLabel();
