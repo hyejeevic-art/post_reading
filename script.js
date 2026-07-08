@@ -203,11 +203,6 @@ async function syncWithSupabase() {
                 if (!r.completedDays) r.completedDays = [];
             });
 
-            while (syncedReaders.length < 20) {
-                const nextId = syncedReaders.length + 1;
-                syncedReaders.push({ id: nextId, name: `참가자 ${nextId}`, book: '', completedDays: [], uid: null });
-                updated = true;
-            }
             challengeData.readers = syncedReaders;
             
             isInitialSyncDone = true;

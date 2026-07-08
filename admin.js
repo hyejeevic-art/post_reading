@@ -106,19 +106,19 @@ function renderAdminSlots() {
         const actions = document.createElement('div');
         actions.className = 'admin-slot-actions';
         
-        if (isOccupied) {
-            const delBtn = document.createElement('button');
-            delBtn.className = 'admin-btn-delete';
-            delBtn.textContent = '삭제';
-            delBtn.onclick = () => adminDeleteUser(index);
-            actions.appendChild(delBtn);
-        } else {
+        if (!isOccupied) {
             const addBtn = document.createElement('button');
             addBtn.className = 'admin-btn-add';
-            addBtn.textContent = '강제 추가';
+            addBtn.textContent = '할당';
             addBtn.onclick = () => adminAddUser(index);
             actions.appendChild(addBtn);
         }
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'admin-btn-delete';
+        delBtn.textContent = isOccupied ? '초기화(삭제)' : '슬롯 삭제';
+        delBtn.onclick = () => adminDeleteUser(index);
+        actions.appendChild(delBtn);
 
         row.appendChild(info);
         row.appendChild(actions);
@@ -142,12 +142,31 @@ async function pushToSupabase() {
 }
 
 async function adminDeleteUser(index) {
-    if (confirm('이 사용자의 모든 기록이 삭제되고 슬롯이 초기화됩니다. 계속하시겠습니까?')) {
-        const id = challengeData.readers[index].id;
-        challengeData.readers[index] = { id: id, name: `참가자 ${id}`, book: '', completedDays: [], uid: null };
+    if (confirm('이 슬롯을 완전히 삭제하시겠습니까? (복구 불가)')) {
+        challengeData.readers.splice(index, 1);
+        // Re-assign IDs sequentially to keep things tidy
+        challengeData.readers.forEach((r, idx) => {
+            r.id = idx + 1;
+            if (!r.uid && r.name.startsWith('참가자 ')) {
+                r.name = `참가자 ${r.id}`;
+            }
+        });
         await pushToSupabase();
         renderAdminSlots();
     }
+}
+
+async function adminCreateSlot() {
+    const nextId = challengeData.readers.length + 1;
+    challengeData.readers.push({ 
+        id: nextId, 
+        name: `참가자 ${nextId}`, 
+        book: '', 
+        completedDays: [], 
+        uid: null 
+    });
+    await pushToSupabase();
+    renderAdminSlots();
 }
 
 async function adminAddUser(index) {

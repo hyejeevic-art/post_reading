@@ -59,9 +59,14 @@
             </div>
             
             <div id="admin-content" style="display: none;">
-                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
-                    슬롯 강제 할당 및 삭제를 수행할 수 있습니다. 변경사항은 즉시 데이터베이스에 반영됩니다.
-                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <p style="color: var(--text-muted); margin: 0;">
+                        슬롯 강제 할당 및 삭제를 수행할 수 있습니다.
+                    </p>
+                    <button onclick="adminCreateSlot()" class="theme-btn" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem;">
+                        + 새 슬롯 추가
+                    </button>
+                </div>
                 <div class="admin-list-container" id="admin-slots-container">
                     <!-- slots injected via JS -->
                     <p>데이터를 불러오는 중...</p>
