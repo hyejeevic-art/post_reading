@@ -2,7 +2,50 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <!-- ★ 카카오톡/인앱 브라우저 즉시 감지 - 가장 먼저 실행 ★ -->
+    <script>
+    (function() {
+        var ua = navigator.userAgent || '';
+        var isKakao = /KAKAOTALK/i.test(ua);
+        var isLine = /Line\//i.test(ua);
+        var isInsta = /Instagram/i.test(ua);
+        var isFB = /FBAN|FBAV/i.test(ua);
+        var isNaver = /NaverApp/i.test(ua);
+        var isInApp = isKakao || isLine || isInsta || isFB || isNaver;
+
+        if (!isInApp) return;
+
+        var url = location.href;
+        var isIOS = /iPhone|iPad|iPod/i.test(ua);
+        var isAndroid = /Android/i.test(ua);
+
+        if (isKakao && isIOS) {
+            // 카카오톡 iOS: openExternal 스킴으로 Safari에서 강제 열기
+            location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
+            return;
+        }
+
+        if (isKakao && isAndroid) {
+            // 카카오톡 Android: intent 스킴으로 Chrome에서 강제 열기
+            location.href = 'intent://' + url.replace(/^https?:\/\//, '') +
+                '#Intent;scheme=https;package=com.android.chrome;end';
+            return;
+        }
+
+        if (isIOS) {
+            // 기타 인앱 브라우저 iOS: document.location trick
+            location.href = url;
+        }
+
+        if (isAndroid) {
+            // 기타 인앱 브라우저 Android
+            location.href = 'intent://' + url.replace(/^https?:\/\//, '') +
+                '#Intent;scheme=https;package=com.android.chrome;end';
+        }
+    })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <title>Post 매일 원서 페이지 읽기. with 빛나는사람아</title>
     <meta name="description" content="매일 영어 원서 읽기 미션 트래커">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +56,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- 카카오톡 인앱 브라우저 감지 배너 (자동 리다이렉트 실패 시 fallback) -->
+    <div id="inapp-banner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999; background:#FEE500; color:#181600; padding:14px 16px; box-shadow:0 2px 12px rgba(0,0,0,0.25); flex-direction:column; gap:10px; align-items:center;">
+        <div style="font-size:15px; font-weight:800; text-align:center;">⚠️ 카카오톡에서는 구글 로그인이 안 됩니다</div>
+        <div style="font-size:13px; font-weight:600; text-align:center; line-height:1.5;">아래 버튼을 눌러 외부 브라우저에서 열어주세요!</div>
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; width:100%;">
+            <button id="open-external-btn" onclick="openInExternalBrowser()" style="background:#181600; color:#FEE500; border:none; border-radius:10px; padding:10px 20px; font-size:14px; font-weight:800; cursor:pointer; flex:1; max-width:160px;">🌐 외부 브라우저로</button>
+            <button id="copy-url-btn" onclick="copyUrlToClipboard()" style="background:#fff; color:#181600; border:2px solid #181600; border-radius:10px; padding:10px 20px; font-size:14px; font-weight:800; cursor:pointer; flex:1; max-width:160px;">📋 주소 복사</button>
+        </div>
+        <div id="copy-success-msg" style="display:none; font-size:12px; font-weight:700; color:#1a6b00;">✅ 복사됨! Safari/Chrome에서 붙여넣기 해주세요</div>
+    </div>
     <div class="background-decor">
         <div class="circle c1"></div>
         <div class="circle c2"></div>

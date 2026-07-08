@@ -3,6 +3,91 @@ const supabaseUrl = 'https://nchyndflukleofvspyix.supabase.co';
 const supabaseKey = 'sb_publishable_XZg0Fp-5J5ghgfZ9WHdFtw_yTes0vS-';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+// ─── 인앱 브라우저 감지 & 외부 브라우저 리다이렉트 ─────────────
+function isInAppBrowser() {
+    var ua = navigator.userAgent || '';
+    return /KAKAOTALK/i.test(ua) ||
+           /Line\//i.test(ua) ||
+           /Instagram/i.test(ua) ||
+           /FBAN|FBAV/i.test(ua) ||
+           /NaverApp/i.test(ua);
+}
+
+function openInExternalBrowser() {
+    var url = window.location.href;
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+    var isKakao = /KAKAOTALK/i.test(ua);
+
+    if (isKakao && isIOS) {
+        // 카카오톡 iOS 전용 공식 스킴
+        location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
+    } else if (isIOS) {
+        // 기타 iOS 인앱 브라우저 → Safari로
+        location.href = url;
+    } else if (isAndroid) {
+        // Android → Chrome intent
+        location.href = 'intent://' + url.replace(/^https?:\/\//, '') +
+            '#Intent;scheme=https;package=com.android.chrome;end';
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
+function copyUrlToClipboard() {
+    var url = window.location.href;
+    var msg = document.getElementById('copy-success-msg');
+
+    // Clipboard API 시도 (최신 브라우저)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+            if (msg) { msg.style.display = 'block'; }
+        }).catch(function() {
+            _fallbackCopyUrl(url, msg);
+        });
+    } else {
+        _fallbackCopyUrl(url, msg);
+    }
+}
+
+function _fallbackCopyUrl(url, msg) {
+    // 구형 방식으로 복사
+    var el = document.createElement('textarea');
+    el.value = url;
+    el.style.position = 'fixed';
+    el.style.top = '-9999px';
+    document.body.appendChild(el);
+    el.focus();
+    el.select();
+    try {
+        document.execCommand('copy');
+        if (msg) { msg.style.display = 'block'; }
+    } catch (e) {
+        alert('주소를 직접 복사해서 Safari/Chrome에서 열어주세요:\n' + url);
+    }
+    document.body.removeChild(el);
+}
+
+function checkInAppBrowser() {
+    if (!isInAppBrowser()) return;
+
+    var ua = navigator.userAgent || '';
+    var isKakao = /KAKAOTALK/i.test(ua);
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+
+    // 자동 리다이렉트 시도 (이미 <head> 스크립트에서 1차 시도됨)
+    // 여기선 실패했을 경우를 위한 fallback 배너 표시
+    var banner = document.getElementById('inapp-banner');
+    if (banner) {
+        banner.style.display = 'flex';
+        setTimeout(function() {
+            document.body.style.paddingTop = (banner.offsetHeight + 4) + 'px';
+        }, 50);
+    }
+}
+
 // State management
 let currentUser = null;
 let isInitialSyncDone = false;
@@ -286,6 +371,13 @@ async function toggleAuth() {
         try {
             if (window.location.protocol === 'file:') {
                 alert("로컬 파일(file://) 환경에서는 구글 로그인을 진행할 수 없습니다.\nVS Code의 Live Server 등을 이용해 http://localhost 환경에서 실행해 주세요!");
+                return;
+            }
+            // 인앱 브라우저에서는 OAuth가 동작하지 않으므로 외부 브라우저 유도
+            if (isInAppBrowser()) {
+                if (confirm('카카오톡/인앱 브라우저에서는 구글 로그인이 제한됩니다.\n외부 브라우저(Safari/Chrome)로 열어서 로그인해 주세요!\n\n지금 외부 브라우저로 열까요?')) {
+                    openInExternalBrowser();
+                }
                 return;
             }
             const { error } = await supabaseClient.auth.signInWithOAuth({
@@ -866,6 +958,7 @@ function renderLeaderboard(readers, totalDays) {
 
 // ─── Initialize ──────────────────────────────────────────
 window.onload = async () => {
+    checkInAppBrowser(); // 인앱 브라우저 감지
     loadDarkMode();
     loadLocalData();
 
