@@ -43,9 +43,15 @@ function updateAuthUI() {
     
     if (currentUser) {
         const displayName = currentUser.user_metadata?.full_name || currentUser.email || '';
+        const userEmail = (currentUser.email || currentUser.user_metadata?.email || '').toLowerCase();
         
-        // Check Admin privilege
-        if (currentUser.email === 'hyejee.vic@gmail.com') {
+        // Check Admin privilege (broad check for all known admin identifiers)
+        if (
+            userEmail === 'hyejee.vic@gmail.com' || 
+            displayName === 'H K' || 
+            displayName === 'HK' || 
+            displayName.includes('빛나는사람아')
+        ) {
             authSection.querySelector('p').textContent = `환영합니다, 관리자 ${displayName}님.`;
             authBtnText.textContent = '로그아웃';
             adminContent.style.display = 'block';
