@@ -4,6 +4,63 @@ const supabaseKey = 'sb_publishable_XZg0Fp-5J5ghgfZ9WHdFtw_yTes0vS-';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 let challengeData = null;
+let currentUser = null;
+
+// OAuth config
+const getURL = () => {
+    let url = window.location.origin;
+    if (url.includes('github.io')) {
+        url = url + '/post_reading/admin.html';
+    } else {
+        url = url + '/admin.html';
+    }
+    return url;
+};
+
+async function toggleAuth() {
+    if (currentUser) {
+        await supabaseClient.auth.signOut();
+        currentUser = null;
+        updateAuthUI();
+    } else {
+        await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: getURL(),
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                },
+            }
+        });
+    }
+}
+
+function updateAuthUI() {
+    const authSection = document.getElementById('auth-section');
+    const adminContent = document.getElementById('admin-content');
+    const authBtnText = document.getElementById('admin-auth-btn-text');
+    
+    if (currentUser) {
+        const displayName = currentUser.user_metadata?.full_name || currentUser.email || '';
+        
+        // Check Admin privilege
+        if (displayName.includes('빛나는사람아') || currentUser.email === '빛나는사람아@gmail.com') {
+            authSection.querySelector('p').textContent = `환영합니다, 관리자 ${displayName}님.`;
+            authBtnText.textContent = '로그아웃';
+            adminContent.style.display = 'block';
+            loadData();
+        } else {
+            authSection.querySelector('p').innerHTML = `환영합니다, ${displayName}님.<br><br><span style="color:red; font-weight:bold;">관리자 권한이 없습니다.</span>`;
+            authBtnText.textContent = '로그아웃';
+            adminContent.style.display = 'none';
+        }
+    } else {
+        authSection.querySelector('p').textContent = '관리자 권한을 확인하기 위해 로그인해주세요.';
+        authBtnText.textContent = '구글 로그인';
+        adminContent.style.display = 'none';
+    }
+}
 
 async function loadData() {
     try {
@@ -113,7 +170,15 @@ function subscribeToChanges() {
         .subscribe();
 }
 
-window.onload = () => {
-    loadData();
+window.onload = async () => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        currentUser = session?.user || null;
+        updateAuthUI();
+    });
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    currentUser = session?.user || null;
+    
+    updateAuthUI();
     subscribeToChanges();
 };

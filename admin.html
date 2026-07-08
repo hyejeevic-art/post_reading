@@ -50,13 +50,22 @@
                 <a href="index.html" class="back-link">← 메인으로 돌아가기</a>
             </div>
             
-            <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
-                슬롯 강제 할당 및 삭제를 수행할 수 있습니다. 변경사항은 즉시 데이터베이스에 반영됩니다.
-            </p>
+            <div id="auth-section" style="margin-bottom: 2rem; text-align: center; background: var(--card-bg); padding: 2rem; border-radius: 8px; border: 1px solid var(--glass-border);">
+                <p style="margin-bottom: 1rem;">관리자 권한을 확인하기 위해 로그인해주세요.</p>
+                <button id="admin-auth-btn" onclick="toggleAuth()" class="theme-btn" style="font-size: 1.1rem; padding: 0.5rem 1.5rem;">
+                    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" style="width: 20px; vertical-align: middle; margin-right: 8px; background: white; border-radius: 50%; padding: 2px;">
+                    <span id="admin-auth-btn-text">구글 로그인</span>
+                </button>
+            </div>
             
-            <div class="admin-list-container" id="admin-slots-container">
-                <!-- slots injected via JS -->
-                <p>데이터를 불러오는 중...</p>
+            <div id="admin-content" style="display: none;">
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
+                    슬롯 강제 할당 및 삭제를 수행할 수 있습니다. 변경사항은 즉시 데이터베이스에 반영됩니다.
+                </p>
+                <div class="admin-list-container" id="admin-slots-container">
+                    <!-- slots injected via JS -->
+                    <p>데이터를 불러오는 중...</p>
+                </div>
             </div>
         </div>
     </main>
