@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - Post 매일 원서 읽기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-decor">
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+    </div>
+
+    <main class="container">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h2>⚙️ 챌린지 관리자 페이지</h2>
+                <a href="index.html" class="back-link">← 메인으로 돌아가기</a>
+            </div>
+            
+            <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
+                슬롯 강제 할당 및 삭제를 수행할 수 있습니다. 변경사항은 즉시 데이터베이스에 반영됩니다.
+            </p>
+            
+            <div class="admin-list-container" id="admin-slots-container">
+                <!-- slots injected via JS -->
+                <p>데이터를 불러오는 중...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
