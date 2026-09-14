@@ -34,34 +34,21 @@
         }
         .back-link:hover { text-decoration: underline; }
 
-        /* Tabs */
-        .admin-tabs {
+        /* Tabs Removed for simpler interface */
+        .admin-section {
+            margin-bottom: 3rem;
+        }
+        .admin-section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
             display: flex;
+            align-items: center;
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
             border-bottom: 2px solid var(--glass-border);
-            padding-bottom: 0;
+            padding-bottom: 0.8rem;
         }
-        .admin-tab-btn {
-            background: none;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            transition: all 0.2s;
-        }
-        .admin-tab-btn:hover { color: var(--primary); }
-        .admin-tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-        .admin-tab-content { display: none; }
-        .admin-tab-content.active { display: block; }
 
         /* Season Cards */
         .seasons-grid {
@@ -330,16 +317,13 @@
 
             <!-- Admin Content (shown only after auth) -->
             <div id="admin-content" style="display: none;">
-                <!-- Tabs -->
-                <div class="admin-tabs">
-                    <button class="admin-tab-btn active" onclick="switchTab('seasons')">📚 기수 목록</button>
-                    <button class="admin-tab-btn" onclick="switchTab('slots')">👤 슬롯 관리</button>
-                </div>
-
-                <!-- Tab: Seasons -->
-                <div id="tab-seasons" class="admin-tab-content active">
-                    <div class="add-season-btn-wrap">
-                        <button onclick="showNewSeasonModal()" class="theme-btn" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1.2rem;">
+                
+                <!-- Section: Seasons -->
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <span>📚 전체 기수 목록</span>
+                        <div style="flex-grow: 1;"></div>
+                        <button onclick="showNewSeasonModal()" class="theme-btn" style="background: var(--primary); color: white; border: none; padding: 0.4rem 1rem; font-size: 0.9rem;">
                             + 새 기수 추가
                         </button>
                     </div>
@@ -348,8 +332,11 @@
                     </div>
                 </div>
 
-                <!-- Tab: Slots -->
-                <div id="tab-slots" class="admin-tab-content">
+                <!-- Section: Slots -->
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <span>👤 기수별 슬롯 관리</span>
+                    </div>
                     <div class="slot-section-header">
                         <div class="slot-season-selector">
                             <label style="font-weight:600; font-size:0.9rem;">기수 선택:</label>
@@ -358,7 +345,7 @@
                             </select>
                         </div>
                         <button onclick="adminCreateSlot()" id="create-slot-btn" class="theme-btn" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem;" disabled>
-                            + 새 슬롯 추가
+                            + 빈 슬롯 1개 추가
                         </button>
                     </div>
                     <div class="admin-list-container" id="admin-slots-container">

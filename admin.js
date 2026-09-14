@@ -75,14 +75,19 @@ function updateAuthUI() {
 }
 
 // ────────────────────────────────────────────────────────
-// Tab Switching
+// UI Navigation
 // ────────────────────────────────────────────────────────
-function switchTab(tabName) {
-    document.querySelectorAll('.admin-tab-btn').forEach((btn, i) => {
-        btn.classList.toggle('active', (tabName === 'seasons' && i === 0) || (tabName === 'slots' && i === 1));
-    });
-    document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.remove('active'));
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+// Scroll to slots section
+function goToSlotTab(seasonId) {
+    selectedSeasonId = seasonId;
+    populateSlotSeasonSelect();
+    const select = document.getElementById('slot-season-select');
+    if (select) select.value = seasonId;
+    document.getElementById('create-slot-btn').disabled = false;
+    renderAdminSlots();
+    
+    // Smooth scroll down to the slots section
+    document.querySelector('.slot-section-header').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ────────────────────────────────────────────────────────
@@ -194,15 +199,7 @@ function populateSlotSeasonSelect() {
     document.getElementById('create-slot-btn').disabled = !selectedSeasonId;
 }
 
-function goToSlotTab(seasonId) {
-    selectedSeasonId = seasonId;
-    switchTab('slots');
-    populateSlotSeasonSelect();
-    const select = document.getElementById('slot-season-select');
-    if (select) select.value = seasonId;
-    document.getElementById('create-slot-btn').disabled = false;
-    renderAdminSlots();
-}
+
 
 function onSlotSeasonChange() {
     const select = document.getElementById('slot-season-select');
