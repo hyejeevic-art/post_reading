@@ -91,6 +91,7 @@ function checkInAppBrowser() {
 // State management
 let currentUser = null;
 let isInitialSyncDone = false;
+let activeSeasonId = null; // id of the currently active season row
 
 // Selected Month (starts at July 2026)
 let currentYear = 2026;
@@ -262,26 +263,39 @@ function updateUI() {
 // ─── Supabase Sync ───────────────────────────────────────
 async function syncWithSupabase() {
     try {
-        const { data, error } = await supabaseClient
+        // Prefer active=true season; fall back to id=1 for backward compatibility
+        let query = supabaseClient
             .from('challenge_data')
-            .select('theme, viewMode, readers')
-            .eq('id', 1)
-            .single();
+            .select('id, theme, viewMode, readers, active, season_name')
+            .eq('active', true)
+            .limit(1);
 
-        if (error) throw error;
+        let { data, error } = await query;
 
-        if (data) {
-            challengeData.theme = data.theme || 'modern';
-            
+        // If no active row found (old schema without active column), fall back to id=1
+        if (error || !data || data.length === 0) {
+            const fallback = await supabaseClient
+                .from('challenge_data')
+                .select('id, theme, viewMode, readers, season_name')
+                .eq('id', 1)
+                .single();
+            if (fallback.error) throw fallback.error;
+            data = [fallback.data];
+        }
+
+        const row = data[0];
+        if (row) {
+            activeSeasonId = row.id;
+            challengeData.theme = row.theme || 'modern';
+
             // Sync Year and Month from viewMode
-            if (data.viewMode && data.viewMode.includes('-')) {
-                const parts = data.viewMode.split('-');
+            if (row.viewMode && row.viewMode.includes('-')) {
+                const parts = row.viewMode.split('-');
                 currentYear = parseInt(parts[0], 10) || 2026;
                 currentMonth = parseInt(parts[1], 10) || 6;
             }
 
-            let syncedReaders = Array.isArray(data.readers) ? data.readers : challengeData.readers;
-            let updated = false;
+            let syncedReaders = Array.isArray(row.readers) ? row.readers : challengeData.readers;
 
             // Ensure readers array contains correct properties
             syncedReaders.forEach(r => {
@@ -289,16 +303,12 @@ async function syncWithSupabase() {
             });
 
             challengeData.readers = syncedReaders;
-            
+
             isInitialSyncDone = true;
-            
+
             saveLocally();
             updateUI();
-            
-            if (updated) {
-                pushToSupabase();
-            }
-            console.log('Synced with Supabase');
+            console.log(`Synced with Supabase (season id=${activeSeasonId}, name=${row.season_name || '기본'})`);
         }
     } catch (err) {
         console.error('Supabase Sync failed:', err);
@@ -306,15 +316,26 @@ async function syncWithSupabase() {
 }
 
 function subscribeToChanges() {
+    // Subscribe to all updates on challenge_data; filter client-side to activeSeasonId
     supabaseClient
         .channel('custom-all-channel')
         .on(
             'postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'challenge_data', filter: 'id=eq.1' },
+            { event: 'UPDATE', schema: 'public', table: 'challenge_data' },
             (payload) => {
+                // If active flag switched on a different row, re-sync to pick up new active season
+                if (payload.new.active === true && payload.new.id !== activeSeasonId) {
+                    console.log('활성 기수 변경 감지, 재동기화...');
+                    syncWithSupabase();
+                    return;
+                }
+
+                // Only process updates for the currently active season
+                if (payload.new.id !== activeSeasonId) return;
+
                 console.log('실시간 업데이트 수신:', payload);
                 challengeData.theme = payload.new.theme || 'modern';
-                
+
                 // Sync Year and Month from viewMode
                 if (payload.new.viewMode && payload.new.viewMode.includes('-')) {
                     const parts = payload.new.viewMode.split('-');
@@ -326,10 +347,6 @@ function subscribeToChanges() {
                 syncedReaders.forEach(r => {
                     if (!r.completedDays) r.completedDays = [];
                 });
-                while (syncedReaders.length < 20) {
-                    const nextId = syncedReaders.length + 1;
-                    syncedReaders.push({ id: nextId, name: `참가자 ${nextId}`, completedDays: [], uid: null });
-                }
                 challengeData.readers = syncedReaders;
                 saveLocally();
                 updateUI();
@@ -345,17 +362,18 @@ async function pushToSupabase() {
     }
     saveLocally();
     const viewModeStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+    const targetId = activeSeasonId || 1; // fallback to id=1 for backward compatibility
     try {
         const { error } = await supabaseClient
             .from('challenge_data')
-            .upsert({
-                id: 1,
+            .update({
                 theme: challengeData.theme,
                 viewMode: viewModeStr,
                 readers: challengeData.readers
-            });
+            })
+            .eq('id', targetId);
         if (error) throw error;
-        console.log('Data saved to Supabase');
+        console.log(`Data saved to Supabase (season id=${targetId})`);
     } catch (err) {
         console.error('Supabase Push failed:', err);
     }

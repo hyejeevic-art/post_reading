@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .admin-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 2rem auto;
             background: var(--card-bg);
             padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
         }
@@ -32,8 +32,277 @@
             text-decoration: none;
             font-weight: 600;
         }
-        .back-link:hover {
-            text-decoration: underline;
+        .back-link:hover { text-decoration: underline; }
+
+        /* Tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--glass-border);
+            padding-bottom: 0;
+        }
+        .admin-tab-btn {
+            background: none;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .admin-tab-btn:hover { color: var(--primary); }
+        .admin-tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .admin-tab-content { display: none; }
+        .admin-tab-content.active { display: block; }
+
+        /* Season Cards */
+        .seasons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .season-card {
+            background: var(--card-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .season-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+        .season-card.active-season {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(99,102,241,0.05));
+        }
+        .season-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            margin-bottom: 0.5rem;
+        }
+        .badge-active {
+            background: rgba(16,185,129,0.15);
+            color: #10b981;
+        }
+        .badge-past {
+            background: rgba(100,116,139,0.12);
+            color: var(--text-muted);
+        }
+        .season-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .season-meta {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        }
+        .season-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .btn-sm {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover { opacity: 0.88; }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+        .btn-outline:hover { background: var(--primary-glow); }
+        .btn-danger {
+            background: transparent;
+            color: #ef4444;
+            border: 1.5px solid #ef4444;
+        }
+        .btn-danger:hover { background: rgba(239,68,68,0.08); }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-success:hover { opacity: 0.88; }
+
+        /* New Season Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 520px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: modalSlideIn 0.25s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-box h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.6rem 0.9rem;
+            border: 1.5px solid var(--glass-border);
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            background: var(--card-bg);
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Slot Management */
+        .slot-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .slot-season-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .slot-season-selector select {
+            padding: 0.4rem 0.8rem;
+            border: 1.5px solid var(--glass-border);
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            background: var(--card-bg);
+            color: var(--text-main);
+            cursor: pointer;
+        }
+        .slot-season-selector select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .admin-slot-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: background 0.15s;
+        }
+        .admin-slot-row:hover { background: var(--day-bg); }
+        .admin-slot-info { font-size: 0.92rem; }
+        .admin-slot-actions { display: flex; gap: 0.5rem; }
+        .admin-btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .admin-btn-delete {
+            background: transparent;
+            color: #ef4444;
+            border: 1.5px solid #ef4444;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .admin-btn-delete:hover { background: rgba(239,68,68,0.08); }
+        .admin-btn-add:hover { opacity: 0.85; }
+
+        .add-season-btn-wrap {
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 1rem;
+            font-size: 0.95rem;
+        }
+        .empty-state .emoji { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+
+        .info-banner {
+            background: rgba(99,102,241,0.08);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -49,7 +318,8 @@
                 <h2>⚙️ 챌린지 관리자 페이지</h2>
                 <a href="index.html" class="back-link">← 메인으로 돌아가기</a>
             </div>
-            
+
+            <!-- Auth Section -->
             <div id="auth-section" style="margin-bottom: 2rem; text-align: center; background: var(--card-bg); padding: 2rem; border-radius: 8px; border: 1px solid var(--glass-border);">
                 <p style="margin-bottom: 1rem;">관리자 권한을 확인하기 위해 로그인해주세요.</p>
                 <button id="admin-auth-btn" onclick="toggleAuth()" class="theme-btn" style="font-size: 1.1rem; padding: 0.5rem 1.5rem;">
@@ -57,23 +327,90 @@
                     <span id="admin-auth-btn-text">구글 로그인</span>
                 </button>
             </div>
-            
+
+            <!-- Admin Content (shown only after auth) -->
             <div id="admin-content" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <p style="color: var(--text-muted); margin: 0;">
-                        슬롯 강제 할당 및 삭제를 수행할 수 있습니다.
-                    </p>
-                    <button onclick="adminCreateSlot()" class="theme-btn" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem;">
-                        + 새 슬롯 추가
-                    </button>
+                <!-- Tabs -->
+                <div class="admin-tabs">
+                    <button class="admin-tab-btn active" onclick="switchTab('seasons')">📚 기수 목록</button>
+                    <button class="admin-tab-btn" onclick="switchTab('slots')">👤 슬롯 관리</button>
                 </div>
-                <div class="admin-list-container" id="admin-slots-container">
-                    <!-- slots injected via JS -->
-                    <p>데이터를 불러오는 중...</p>
+
+                <!-- Tab: Seasons -->
+                <div id="tab-seasons" class="admin-tab-content active">
+                    <div class="add-season-btn-wrap">
+                        <button onclick="showNewSeasonModal()" class="theme-btn" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1.2rem;">
+                            + 새 기수 추가
+                        </button>
+                    </div>
+                    <div id="seasons-container">
+                        <p style="color: var(--text-muted);">데이터를 불러오는 중...</p>
+                    </div>
+                </div>
+
+                <!-- Tab: Slots -->
+                <div id="tab-slots" class="admin-tab-content">
+                    <div class="slot-section-header">
+                        <div class="slot-season-selector">
+                            <label style="font-weight:600; font-size:0.9rem;">기수 선택:</label>
+                            <select id="slot-season-select" onchange="onSlotSeasonChange()">
+                                <option value="">-- 기수를 선택하세요 --</option>
+                            </select>
+                        </div>
+                        <button onclick="adminCreateSlot()" id="create-slot-btn" class="theme-btn" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem;" disabled>
+                            + 새 슬롯 추가
+                        </button>
+                    </div>
+                    <div class="admin-list-container" id="admin-slots-container">
+                        <div class="empty-state">
+                            <span class="emoji">👆</span>
+                            위에서 기수를 선택하면 슬롯 목록이 표시됩니다.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- New Season Modal -->
+    <div id="new-season-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>🌱 새 기수 추가</h3>
+            <div class="form-group">
+                <label>기수 번호</label>
+                <input type="number" id="input-season-number" class="form-input" placeholder="예: 14" min="1">
+            </div>
+            <div class="form-group">
+                <label>기수 이름</label>
+                <input type="text" id="input-season-name" class="form-input" placeholder="예: 14기">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>시작 월</label>
+                    <input type="month" id="input-start-month" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>종료 월</label>
+                    <input type="month" id="input-end-month" class="form-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>참가자 슬롯 수</label>
+                <input type="number" id="input-slot-count" class="form-input" placeholder="예: 20" value="20" min="1" max="100">
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color: var(--text-main); font-weight: 500;">
+                    <input type="checkbox" id="input-inherit-participants" checked style="width:1.1rem; height:1.1rem; accent-color: var(--primary);">
+                    이전 기수 참가자 명단 이어받기<br>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">(이전 기수의 독서 기록은 안전하게 보관되며, 새 기수는 빈 기록으로 시작합니다)</span>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeNewSeasonModal()" class="btn-sm btn-outline">취소</button>
+                <button onclick="createNewSeason()" class="btn-sm btn-primary">기수 생성</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
